@@ -14,7 +14,7 @@ def read_instance(filename):
     # Scalars
     P = PAP['P'] = int(data[0][2:-1])
     D = PAP['D'] = int(data[1][2:-1])
-    PAP['T'] = int(data[2][2:-1])
+    PAP['T'] = int(data[2][2:-1]) # NOTE: unnecessary, always 20
     PAP['S'] = int(data[3][2:-1])
     PAP['H'] = int(data[4][2:-1]) # NOTE: unnecessary, always 3
     
