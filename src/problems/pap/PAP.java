@@ -59,6 +59,15 @@ public class PAP implements Evaluator<Integer[]> {
 	}
 	
 	/**
+	 * Checks if the (professor, class, slot) set is feasible (checks ILP restrictions).
+	 * @param cand (professor, class, slot) set
+	 * @return true if feasible, false otherwise.
+	 */
+	public boolean isFeasible(Integer[] cand) {
+		return true;
+	}
+	
+	/**
 	 * Evaluates the value of a solution by transforming it into a vector. .
 	 * 
 	 * @param sol
