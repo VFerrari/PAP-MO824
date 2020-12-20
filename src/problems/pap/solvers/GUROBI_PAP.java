@@ -119,6 +119,8 @@ public class GUROBI_PAP {
         		}
         	}
         }
+        
+        model.update();
 
         // maximization objective function
         model.set(GRB.IntAttr.ModelSense, -1);
