@@ -134,7 +134,7 @@ public class GUROBI_PAP {
 
         // instances
         //String[] instances = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
-    	String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap", "P70D100S10.pap"};
+    	String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap"};
     	
         // create text file
         FileWriter fileWriter = new FileWriter("results/GUROBI_PAP.txt");
@@ -155,7 +155,7 @@ public class GUROBI_PAP {
             model.optimize();
 
             // save the solution in text file
-            fileWriter.append(instance + ";" + (model.get(GRB.DoubleAttr.ObjVal)-100*gurobi.problem.D) + ";" + (model.get(GRB.DoubleAttr.ObjBound)-100*gurobi.problem.D) + ";" + model.get(GRB.DoubleAttr.Runtime));
+            fileWriter.append(instance + ";" + (model.get(GRB.DoubleAttr.ObjVal)-100*gurobi.problem.D) + ";" + (model.get(GRB.DoubleAttr.ObjBound)-100*gurobi.problem.D) + ";" + model.get(GRB.DoubleAttr.Runtime) + "\n");
 
             // dispose the environment and model
             model.dispose();
