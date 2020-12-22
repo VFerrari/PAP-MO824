@@ -15,8 +15,8 @@ import problems.pap.PAP;
 public class GUROBI_PAP_ALT {
     public static GRBEnv env;
     public static GRBModel model;
-    public GRBVar[][] x, y, z;
-    public GRBVar[] w;
+    public GRBVar[][] x, z;
+    public GRBVar[] y;
     public PAP problem;
 
     public GUROBI_PAP_ALT(String filename) throws IOException {
@@ -24,7 +24,7 @@ public class GUROBI_PAP_ALT {
     }
 
     protected void populateNewModel(GRBModel model) throws GRBException {
-    	int i, j, k;
+    	int i, j;
     	
         // decision variables
         x = new GRBVar[problem.P][problem.D];
@@ -34,11 +34,9 @@ public class GUROBI_PAP_ALT {
         	}
         }
         
-        y = new GRBVar[problem.D][problem.T];
-        for (i = 0; i < problem.D; i++) {
-        	for (j = 0; j < problem.T; j++) {
-        		y[i][j] = model.addVar(0, 1, 0.0f, GRB.BINARY, "y[" + i + "]["+ j + "]");
-        	}
+        y = new GRBVar[problem.D];
+        for (i=0; i<problem.D; i++) {
+        	y[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "y[" + i + "]");
         }
 
         z = new GRBVar[problem.P][problem.T];
@@ -46,11 +44,6 @@ public class GUROBI_PAP_ALT {
         	for (j = 0; j < problem.T; j++) {
         		z[i][j] = model.addVar(0, 1, 0.0f, GRB.BINARY, "z[" + i + "]["+ j + "]");
         	}
-        }
-        
-        w = new GRBVar[problem.D];
-        for (i=0; i<problem.D; i++) {
-        	w[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "w[" + i + "]");
         }
 
         model.update();
@@ -62,7 +55,7 @@ public class GUROBI_PAP_ALT {
             for (j = 0; j < problem.P; j++) {
                 obj.addTerm(problem.A[j][i], x[j][i]);
             }
-            obj.addTerm(100, w[i]);
+            obj.addTerm(100, y[i]);
         }
 
         model.setObjective(obj);
@@ -77,25 +70,14 @@ public class GUROBI_PAP_ALT {
             for(j=0; j<problem.P; j++) {
             	expr.addTerm(1, x[j][i]);
             }
-            model.addConstr(expr, GRB.EQUAL, w[i], String.valueOf("class_" + i + "_profs"));
-        }
-        
-        // Class slots constraints
-        for (i=0; i<problem.D; i++) {
-            expr = new GRBLinExpr();
-            expr2 = new GRBLinExpr();
-            for(j=0; j<problem.T; j++) {
-            	expr.addTerm(1, y[i][j]);
-            }
-            expr2.addTerm(problem.h[i],  w[i]);
-            model.addConstr(expr, GRB.EQUAL, expr2, String.valueOf("class_" + i + "_slots"));
+            model.addConstr(expr, GRB.EQUAL, y[i], String.valueOf("class_" + i + "_profs"));
         }
         
         // Available classrooms constraints
         for (i=0; i<problem.T; i++) {
             expr = new GRBLinExpr();
-            for(j=0; j<problem.D; j++) {
-            	expr.addTerm(1, y[j][i]);
+            for(j=0; j<problem.P; j++) {
+            	expr.addTerm(1, z[j][i]);
             }
             model.addConstr(expr, GRB.LESS_EQUAL, problem.S, String.valueOf("slot_" + i + "_rooms"));
         }
@@ -116,17 +98,17 @@ public class GUROBI_PAP_ALT {
             model.addConstr(expr, GRB.LESS_EQUAL, problem.H, String.valueOf("prof_" + i + "_workload"));
         }
         
-        // Variable coupling constraints
-        for (i=0; i<problem.P; i++) {
-        	for(j=0; j<problem.D; j++) {
-        		for(k=0; k<problem.T; k++) {
-                    expr = new GRBLinExpr();
-        			expr.addTerm(1, x[i][j]);
-        			expr.addTerm(1, y[j][k]);
-        			expr.addConstant(-1);
-        			model.addConstr(expr, GRB.LESS_EQUAL, z[i][k], String.valueOf("prof_" + i + "_class_" + j + "_slot_" + k));
-        		}
+        // One class per professor in each slot.
+        for(i=0; i<problem.P; i++) {
+        	expr = new GRBLinExpr();
+        	expr2 = new GRBLinExpr();
+        	for(j=0; j<problem.T; j++) {
+        		expr.addTerm(1, z[i][j]);
         	}
+        	for(j=0; j<problem.D; j++) {
+        		expr2.addTerm(problem.h[j], x[i][j]);
+        	}
+        	model.addConstr(expr, GRB.EQUAL, expr2, String.valueOf("prof_" + i + "_one_per_slot"));
         }
         
         model.update();
@@ -138,8 +120,8 @@ public class GUROBI_PAP_ALT {
     public static void main(String[] args) throws IOException, GRBException {
 
         // instances
-        //String[] instances = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
-    	String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap"};
+        String[] instances = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
+    	//String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap"};
     	
         // create text file
         FileWriter fileWriter = new FileWriter("results/GUROBI_PAP_ALT.txt");
@@ -162,8 +144,9 @@ public class GUROBI_PAP_ALT {
             // save the solution in text file
             double val   = model.get(GRB.DoubleAttr.ObjVal)-100*gurobi.problem.D;
             double bound = model.get(GRB.DoubleAttr.ObjBound)-100*gurobi.problem.D; 
-            fileWriter.append(instance + ";" + val + ";" + bound + ";" + model.get(GRB.DoubleAttr.Runtime) + "\n");
-
+            double time = model.get(GRB.DoubleAttr.Runtime);
+            fileWriter.append(instance + ";" + val + ";" + bound + ";" + time + "\n");
+            
             // dispose the environment and model
             model.dispose();
             env.dispose();
