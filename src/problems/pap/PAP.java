@@ -290,7 +290,7 @@ public class PAP implements Evaluator<Integer[]> {
 		stok.nextToken();
 		A = new Integer[P][D];
 		for (int i = 0; i < P; i++) {
-			for (int j = i; j < D; j++) {
+			for (int j = 0; j < D; j++) {
 				stok.nextToken();
 				A[i][j] = (int) stok.nval;
 			}
@@ -300,7 +300,7 @@ public class PAP implements Evaluator<Integer[]> {
 		stok.nextToken();
 		r = new Boolean[P][T];
 		for (int i = 0; i < P; i++) {
-			for (int j = i; j < T; j++) {
+			for (int j = 0; j < T; j++) {
 				stok.nextToken();
 				r[i][j] = ((int) stok.nval) == 1;
 			}
@@ -333,8 +333,8 @@ public class PAP implements Evaluator<Integer[]> {
 	public void printMatrix() {
 
 		for (int i = 0; i < P; i++) {
-			for (int j = i; j < D; j++) {
-				System.out.print(A[i][j] + " ");
+			for (int j = 0; j < D; j++) {
+				System.out.print(A[i][j] + "\t");
 			}
 			System.out.println();
 		}

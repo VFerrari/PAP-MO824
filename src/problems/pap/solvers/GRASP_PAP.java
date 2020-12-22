@@ -122,10 +122,9 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 */
 	@Override
 	public void updateCL() {
-		ArrayList<Integer[]> CL_copy = new ArrayList<>(this.CL);
-		for (Integer[] c : CL_copy){
-			if(!((PAP)this.ObjFunction).isFeasible(c)){
-				this.CL.remove(c);
+		for (Integer[] c : CL){
+			if(((PAP)this.ObjFunction).isFeasible(c)){
+				RCL.add(c);
 			}
 		}
 	}
@@ -168,7 +167,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 			updateCL();
 				
 			// Evaluate insertions
-			for (Integer[] candIn : CL) {
+			for (Integer[] candIn : RCL) {
 				deltaCost = ObjFunction.evaluateInsertionCost(candIn, currentSol);
 				if (deltaCost < minDeltaCost) {
 					minDeltaCost = deltaCost;
@@ -205,8 +204,10 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 				if (bestCandIn != null) {
 					currentSol.add(bestCandIn);
 					CL.remove(bestCandIn);
+					RCL.remove(bestCandIn);
 				}
 				ObjFunction.evaluate(currentSol);
+				RCL.clear();
 			}
 		} while (minDeltaCost < -Double.MIN_VALUE);
 

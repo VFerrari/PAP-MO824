@@ -67,7 +67,7 @@ public class GUROBI_PAP {
         // Professor constraints
         for (i=0; i<problem.D; i++) {
             expr = new GRBLinExpr();
-            for(j=0; i<problem.P; j++) {
+            for(j=0; j<problem.P; j++) {
             	expr.addTerm(1, x[j][i]);
             }
             model.addConstr(expr, GRB.LESS_EQUAL, 1.0, String.valueOf("class_" + i + "_profs"));
@@ -76,7 +76,7 @@ public class GUROBI_PAP {
         // Class slots constraints
         for (i=0; i<problem.D; i++) {
             expr = new GRBLinExpr();
-            for(j=0; i<problem.T; j++) {
+            for(j=0; j<problem.T; j++) {
             	expr.addTerm(1, y[i][j]);
             }
             model.addConstr(expr, GRB.EQUAL, problem.h[i], String.valueOf("class_" + i + "_slots"));
@@ -85,7 +85,7 @@ public class GUROBI_PAP {
         // Available classrooms constraints
         for (i=0; i<problem.T; i++) {
             expr = new GRBLinExpr();
-            for(j=0; i<problem.D; j++) {
+            for(j=0; j<problem.D; j++) {
             	expr.addTerm(1, y[j][i]);
             }
             model.addConstr(expr, GRB.LESS_EQUAL, problem.S, String.valueOf("slot_" + i + "_rooms"));
@@ -101,7 +101,7 @@ public class GUROBI_PAP {
         // Professor workload constraints
         for (i=0; i<problem.P; i++) {
             expr = new GRBLinExpr();
-            for(j=0; i<problem.T; j++) {
+            for(j=0; j<problem.T; j++) {
             	expr.addTerm(1, z[i][j]);
             }
             model.addConstr(expr, GRB.LESS_EQUAL, problem.H, String.valueOf("prof_" + i + "_workload"));
