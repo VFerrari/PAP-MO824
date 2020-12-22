@@ -62,7 +62,7 @@ public class GUROBI_PAP {
         model.update();
 
         // Constraints
-        GRBLinExpr expr;
+        GRBLinExpr expr, expr2;
         
         // Professor constraints
         for (i=0; i<problem.D; i++) {
@@ -76,10 +76,14 @@ public class GUROBI_PAP {
         // Class slots constraints
         for (i=0; i<problem.D; i++) {
             expr = new GRBLinExpr();
+            expr2 = new GRBLinExpr();
             for(j=0; j<problem.T; j++) {
             	expr.addTerm(1, y[i][j]);
             }
-            model.addConstr(expr, GRB.EQUAL, problem.h[i], String.valueOf("class_" + i + "_slots"));
+            for(j=0; j<problem.P; j++) {
+            	expr2.addTerm(problem.h[i],  x[j][i]);
+            }
+            model.addConstr(expr, GRB.EQUAL, expr2, String.valueOf("class_" + i + "_slots"));
         }
         
         // Available classrooms constraints
@@ -129,8 +133,9 @@ public class GUROBI_PAP {
     public static void main(String[] args) throws IOException, GRBException {
 
         // instances
-        String[] instances = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
-
+        //String[] instances = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
+    	String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap", "P70D100S10.pap"};
+    	
         // create text file
         FileWriter fileWriter = new FileWriter("results/GUROBI_PAP.txt");
 

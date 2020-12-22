@@ -167,7 +167,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 			updateCL();
 				
 			// Evaluate insertions
-			for (Integer[] candIn : RCL) {
+			for (Integer[] candIn : CL) {
 				deltaCost = ObjFunction.evaluateInsertionCost(candIn, currentSol);
 				if (deltaCost < minDeltaCost) {
 					minDeltaCost = deltaCost;
