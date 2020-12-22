@@ -12,13 +12,14 @@ import java.io.IOException;
 
 import problems.pap.PAP;
 
-public class GUROBI_PAP {
+public class GUROBI_PAP_ALT {
     public static GRBEnv env;
     public static GRBModel model;
     public GRBVar[][] x, y, z;
+    public GRBVar[] w;
     public PAP problem;
 
-    public GUROBI_PAP(String filename) throws IOException {
+    public GUROBI_PAP_ALT(String filename) throws IOException {
         this.problem = new PAP(filename);
     }
 
@@ -46,6 +47,11 @@ public class GUROBI_PAP {
         		z[i][j] = model.addVar(0, 1, 0.0f, GRB.BINARY, "z[" + i + "]["+ j + "]");
         	}
         }
+        
+        w = new GRBVar[problem.D];
+        for (i=0; i<problem.D; i++) {
+        	w[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "w[" + i + "]");
+        }
 
         model.update();
 
@@ -54,8 +60,9 @@ public class GUROBI_PAP {
 
         for (i = 0; i < problem.D; i++) {
             for (j = 0; j < problem.P; j++) {
-                obj.addTerm(problem.A[j][i]+100, x[j][i]);
+                obj.addTerm(problem.A[j][i], x[j][i]);
             }
+            obj.addTerm(100, w[i]);
         }
 
         model.setObjective(obj);
@@ -70,7 +77,7 @@ public class GUROBI_PAP {
             for(j=0; j<problem.P; j++) {
             	expr.addTerm(1, x[j][i]);
             }
-            model.addConstr(expr, GRB.LESS_EQUAL, 1.0, String.valueOf("class_" + i + "_profs"));
+            model.addConstr(expr, GRB.EQUAL, w[i], String.valueOf("class_" + i + "_profs"));
         }
         
         // Class slots constraints
@@ -80,9 +87,7 @@ public class GUROBI_PAP {
             for(j=0; j<problem.T; j++) {
             	expr.addTerm(1, y[i][j]);
             }
-            for(j=0; j<problem.P; j++) {
-            	expr2.addTerm(problem.h[i],  x[j][i]);
-            }
+            expr2.addTerm(problem.h[i],  w[i]);
             model.addConstr(expr, GRB.EQUAL, expr2, String.valueOf("class_" + i + "_slots"));
         }
         
@@ -137,11 +142,11 @@ public class GUROBI_PAP {
     	String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap"};
     	
         // create text file
-        FileWriter fileWriter = new FileWriter("results/GUROBI_PAP.txt");
+        FileWriter fileWriter = new FileWriter("results/GUROBI_PAP_ALT.txt");
 
         for (String instance : instances) {
             // read the problem
-            GUROBI_PAP gurobi = new GUROBI_PAP("instances/" + instance);
+            GUROBI_PAP_ALT gurobi = new GUROBI_PAP_ALT("instances/" + instance);
 
             // create the environment and model
             env = new GRBEnv();
