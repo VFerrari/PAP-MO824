@@ -225,12 +225,12 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 			// Implement the best move, if it reduces the solution cost.
 			if (minDeltaCost < -Double.MIN_VALUE) {
 				if (bestCandOut != null) {
-					System.out.print("remove ");
+					//System.out.print("remove ");
 					rmElement(bestCandOut);
 					CL.add(bestCandOut);
 				}
 				if (bestCandIn != null) {
-					System.out.print("insert ");
+					//System.out.print("insert ");
 					addElement(bestCandIn);
 					CL.remove(bestCandIn);
 				}
@@ -333,7 +333,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		// Changeable parameters.
 		double alpha1 = 0.25, alpha2 = 0.7;
 		
-		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
+		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S5.pap", 
 					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime);
 		
 		/*

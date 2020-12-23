@@ -138,7 +138,7 @@ public class PAP implements Evaluator<Integer[]> {
 		else {
 			sum = 0;
 			for(t=0; t<T; t++) {
-				sum += (timeSlots[t] < S && r[p][t]) ? 1:0;
+				sum += (timeSlots[t] < S && r[p][t] && profSlots[p][t] < 0) ? 1:0;
 			}
 			
 			feasible = (sum >= h[d]);
