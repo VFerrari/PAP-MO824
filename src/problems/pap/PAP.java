@@ -84,8 +84,7 @@ public class PAP implements Evaluator<Integer[]> {
 		
 		// Time Slots
 		for (int i=0; i<h[d]; i++) {
-			for(; (timeSlots[t] >= S || !r[p][t] || profSlots[p][t] >= 0) && t < T; t++);
-			assert(t < T): "Infeasible! No time slot to insert.";
+			for(; (timeSlots[t] >= S || !r[p][t] || profSlots[p][t] >= 0); t++);
 			timeSlots[t]++;
 			profSlots[p][t] = d;
 		}
@@ -143,6 +142,7 @@ public class PAP implements Evaluator<Integer[]> {
 			}
 			
 			feasible = (sum >= h[d]);
+			//feasible = true;
 			
 		}
 		
