@@ -144,7 +144,16 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	@Override
 	protected void addElement(Integer[] inCand) {
 		currentSol.add(inCand);
-		((PAP)ObjFunction).updateStatus(inCand);		
+		((PAP)ObjFunction).updateStatusAdd(inCand);		
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * Opposite of addElement
+	 */
+	protected void rmElement(Integer[] outCand) {
+		currentSol.remove(outCand);
+		((PAP)ObjFunction).updateStatusRm(outCand);		
 	}
 	
 	/**
@@ -217,12 +226,12 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 			if (minDeltaCost < -Double.MIN_VALUE) {
 				if (bestCandOut != null) {
 					System.out.print("remove ");
-					currentSol.remove(bestCandOut);
+					rmElement(bestCandOut);
 					CL.add(bestCandOut);
 				}
 				if (bestCandIn != null) {
 					System.out.print("insert ");
-					currentSol.add(bestCandIn);
+					addElement(bestCandIn);
 					CL.remove(bestCandIn);
 				}
 				ObjFunction.evaluate(currentSol);

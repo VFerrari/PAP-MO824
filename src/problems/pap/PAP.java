@@ -61,7 +61,7 @@ public class PAP implements Evaluator<Integer[]> {
 	/**
 	 * Array of time slots for each professor.
 	 */
-	public Boolean[][] profSlots;
+	public Integer[][] profSlots;
 	
 	public PAP(String filename) throws IOException {
 		Integer[] vals = readInput(filename);
@@ -71,40 +71,47 @@ public class PAP implements Evaluator<Integer[]> {
 		S = vals[3];
 		H = vals[4];
 		variables = allocateVariables();
-		
-		// Fill time slots
-		timeSlots = new Integer[T];
-		Arrays.fill(timeSlots, 0);
-		
-		// Fill professor slots
-		profSlots = new Boolean[P][T];
-		for(Boolean[] row : profSlots) {
-			Arrays.fill(row, false);
-		}
-		
-		// Fill professor workload
-		profWorkload = new Integer[P];
-		Arrays.fill(profWorkload, 0);
+		resetStatus();
 	}
 		
 	/**
-	 * Updates time slots and professor workloads.
+	 * Updates time slots and professor workloads: insertion.
 	 */
-	public void updateStatus(Integer[] inCand) {
+	public void updateStatusAdd(Integer[] inCand) {
 		int p = inCand[0];
 		int d = inCand[1];
 		int t = 0;
 		
 		// Time Slots
 		for (int i=0; i<h[d]; i++) {
-			for(; (timeSlots[t] >= S || !r[p][t] || profSlots[p][t]) && t < T; t++);
+			for(; (timeSlots[t] >= S || !r[p][t] || profSlots[p][t] >= 0) && t < T; t++);
 			assert(t < T): "Infeasible! No time slot to insert.";
 			timeSlots[t]++;
-			profSlots[p][t] = true;
+			profSlots[p][t] = d;
 		}
 		
 		// Professor
 		profWorkload[p] += h[d];
+	}
+	
+	/**
+	 * Updates time slots and professor workloads: removal.
+	 */
+	public void updateStatusRm(Integer[] outCand) {
+		int p = outCand[0];
+		int d = outCand[1];
+		int t = 0;
+		
+		// Time Slots
+		for (t=0; t<T; t++) {
+			if (profSlots[p][t] == d) {
+				timeSlots[t]--;
+				profSlots[p][t] = -1;
+			}
+		}
+		
+		// Professor
+		profWorkload[p] -= h[d];
 	}
 	
 	/**
@@ -418,9 +425,9 @@ public class PAP implements Evaluator<Integer[]> {
 		Arrays.fill(timeSlots, 0);
 		
 		// Fill professor slots
-		profSlots = new Boolean[P][T];
-		for(Boolean[] row : profSlots) {
-			Arrays.fill(row, false);
+		profSlots = new Integer[P][T];
+		for(Integer[] row : profSlots) {
+			Arrays.fill(row, -1);
 		}
 		
 		// Fill professor workload
