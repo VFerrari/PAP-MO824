@@ -48,6 +48,21 @@ public class PAP implements Evaluator<Integer[]> {
 	 */
 	public final Integer[][] variables;
 	
+	/**
+	 * Array of classes per time slot
+	 */
+	public Integer[] timeSlots;
+	
+	/**
+	 * Array of workloads for each professor.
+	 */
+	public Integer[] profWorkload;
+	
+	/**
+	 * Array of time slots for each professor.
+	 */
+	public Boolean[][] profSlots;
+	
 	public PAP(String filename) throws IOException {
 		Integer[] vals = readInput(filename);
 		P = vals[0];
@@ -56,15 +71,75 @@ public class PAP implements Evaluator<Integer[]> {
 		S = vals[3];
 		H = vals[4];
 		variables = allocateVariables();
+		
+		// Fill time slots
+		timeSlots = new Integer[T];
+		Arrays.fill(timeSlots, 0);
+		
+		// Fill professor slots
+		profSlots = new Boolean[P][T];
+		for(Boolean[] row : profSlots) {
+			Arrays.fill(row, false);
+		}
+		
+		// Fill professor workload
+		profWorkload = new Integer[P];
+		Arrays.fill(profWorkload, 0);
+	}
+		
+	/**
+	 * Updates time slots and professor workloads.
+	 */
+	public void updateStatus(Integer[] inCand) {
+		int p = inCand[0];
+		int d = inCand[1];
+		int t = 0;
+		
+		// Time Slots
+		for (int i=0; i<h[d]; i++) {
+			for(; (timeSlots[t] >= S || !r[p][t] || profSlots[p][t]) && t < T; t++);
+			assert(t < T): "Infeasible! No time slot to insert.";
+			timeSlots[t]++;
+			profSlots[p][t] = true;
+		}
+		
+		// Professor
+		profWorkload[p] += h[d];
 	}
 	
 	/**
-	 * Checks if the (professor, class, slot) set is feasible (checks ILP restrictions).
-	 * @param cand (professor, class, slot) set
+	 * Checks if the (professor, class) set is feasible (checks ILP restrictions).
+	 * @param cand (professor, class) set
 	 * @return true if feasible, false otherwise.
 	 */
 	public boolean isFeasible(Integer[] cand) {
-		return true;
+		boolean feasible = true;
+		int p = cand[0];
+		int d = cand[1];
+		int t, sum;
+		
+		// Check if in solution.
+		if(variables[p][d] == 1) {
+			feasible = false;
+		}
+		
+		// Check if workload handles class.
+		else if(profWorkload[p] + h[d] > H) {
+			feasible = false;
+		}
+		
+		// Check if there are enough available time slots for the element.
+		else {
+			sum = 0;
+			for(t=0; t<T; t++) {
+				sum += (timeSlots[t] < S && r[p][t]) ? 1:0;
+			}
+			
+			feasible = (sum >= h[d]);
+			
+		}
+		
+		return feasible;
 	}
 	
 	/**
@@ -90,7 +165,7 @@ public class PAP implements Evaluator<Integer[]> {
 	 */
 	@Override
 	public Integer getDomainSize() {
-		return P*D*T;
+		return P*D;
 	}
 	
 	/**
@@ -119,9 +194,10 @@ public class PAP implements Evaluator<Integer[]> {
 	 * @return The value of the PAP.
 	 */
 	public Double evaluatePAP() {
-		Integer sum = 0, aux=0;
+		double sum = 0, aux=0;
 
 		for (int j = 0; j < D; j++) {
+			aux = 0;
 			for (int i = 0; i < P; i++) {
 				aux +=  A[i][j] * variables[i][j];
 			}
@@ -155,9 +231,12 @@ public class PAP implements Evaluator<Integer[]> {
 	 *         insertion.
 	 */
 	public Double evaluateInsertionPAP(Integer[] i) {
-
-		if (variables[i[0]][i[1]] == 1)
-			return 0.0;
+		int d = i[1];
+		
+		// If there is already a professor in this class, return lowest possible value.
+		for(int p=0; p<P; p++)
+			if (variables[p][d] == 1)
+				return 0.0;
 
 		return evaluateContributionPAP(i);
 	}
@@ -324,8 +403,31 @@ public class PAP implements Evaluator<Integer[]> {
 	 * Reset the domain variables to their default values.
 	 */
 	public void resetVariables() {
-		Arrays.fill(variables, 0);
+		for(Integer [] row : variables) {
+			Arrays.fill(row, 0);
+		}
 	}
+	
+	/**
+	 * Resets status to 0
+	 */
+	public void resetStatus() {
+		
+		// Fill time slots
+		timeSlots = new Integer[T];
+		Arrays.fill(timeSlots, 0);
+		
+		// Fill professor slots
+		profSlots = new Boolean[P][T];
+		for(Boolean[] row : profSlots) {
+			Arrays.fill(row, false);
+		}
+		
+		// Fill professor workload
+		profWorkload = new Integer[P];
+		Arrays.fill(profWorkload, 0);
+	}
+
 	
 	/**
 	 * Prints matrix {@link A}.

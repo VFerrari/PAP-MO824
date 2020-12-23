@@ -181,7 +181,6 @@ public abstract class AbstractGRASP<E> {
 
 		/* Main loop, which repeats until the stopping criteria is reached. */
 		while (!constructiveStopCriteria()) {
-
 			double maxCost = Double.NEGATIVE_INFINITY, minCost = Double.POSITIVE_INFINITY;
 			currentCost = ObjFunction.evaluate(currentSol);
 			updateCL();
@@ -221,7 +220,7 @@ public abstract class AbstractGRASP<E> {
 			/* Choose a candidate randomly from the RCL */
 			E inCand = chooseRandom();
 			CL.remove(inCand);
-			currentSol.add(inCand);
+			addElement(inCand);
 			ObjFunction.evaluate(currentSol);
 			RCL.clear();
             
@@ -230,6 +229,14 @@ public abstract class AbstractGRASP<E> {
 		}
 
 		return currentSol;
+	}
+	
+	/**
+	 * Add element to solution.
+	 * @param inCand Candidate to be added.
+	 */
+	protected void addElement(E inCand) {
+		currentSol.add(inCand);
 	}
 
 	/**

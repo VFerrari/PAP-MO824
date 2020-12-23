@@ -90,19 +90,18 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 */
 	@Override
 	public ArrayList<Integer[]> makeCL() {
-		int p=0, d=0, t=0; 
+		int D = ((PAP)ObjFunction).D;
+		
+		((PAP)ObjFunction).resetStatus();
 		
 		ArrayList<Integer[]> _CL = new ArrayList<Integer[]>();
 		for (int i = 0; i < ObjFunction.getDomainSize(); i++) {
-			Integer[] cand = {p,d,t};
-			
-			if (((PAP)ObjFunction).r[p][t]) {
-				_CL.add(cand);
-			}
+			Integer[] cand = {i/D, i%D};
+			_CL.add(cand);
+
 		}
 
 		return _CL;
-
 	}
 	
 	/*
@@ -122,11 +121,30 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 */
 	@Override
 	public void updateCL() {
-		for (Integer[] c : CL){
-			if(((PAP)this.ObjFunction).isFeasible(c)){
-				RCL.add(c);
+		CL.clear();
+		
+		// Get constant
+		int D = ((PAP)ObjFunction).D;
+		
+		// Get problem variables
+		((PAP)ObjFunction).setVariables(currentSol);
+		
+		for (int i = 0; i < ObjFunction.getDomainSize(); i++) {
+			Integer[] cand = {i/D, i%D};
+			if(((PAP)ObjFunction).isFeasible(cand)) {
+				CL.add(cand);
 			}
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * Update time slot and professor slots.
+	 */
+	@Override
+	protected void addElement(Integer[] inCand) {
+		currentSol.add(inCand);
+		((PAP)ObjFunction).updateStatus(inCand);		
 	}
 	
 	/**
@@ -138,7 +156,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	@Override
 	public Solution<Integer[]> createEmptySol() {
 		Solution<Integer[]> sol = new Solution<Integer[]>();
-		sol.cost = -100.0*((PAP)ObjFunction).D;
+		sol.cost = 100.0*((PAP)ObjFunction).D;
 		return sol;
 	}
 	
@@ -198,19 +216,18 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 			// Implement the best move, if it reduces the solution cost.
 			if (minDeltaCost < -Double.MIN_VALUE) {
 				if (bestCandOut != null) {
+					System.out.print("remove ");
 					currentSol.remove(bestCandOut);
 					CL.add(bestCandOut);
 				}
 				if (bestCandIn != null) {
+					System.out.print("insert ");
 					currentSol.add(bestCandIn);
 					CL.remove(bestCandIn);
-					RCL.remove(bestCandIn);
 				}
 				ObjFunction.evaluate(currentSol);
-				RCL.clear();
 			}
 		} while (minDeltaCost < -Double.MIN_VALUE);
-
 		return null;
 	}
 	
@@ -271,6 +288,9 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		Solution<Integer[]> bestSol = grasp.solve(maxTime);
 		System.out.println("maxVal = " + bestSol);
+		for(Integer[] e : bestSol)
+			System.out.print("(" + e[0] + "," + e[1] + ") ");
+		System.out.println();
 
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
@@ -286,7 +306,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
         String[] inst = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
 		
 		for(String file : inst) {
-			GRASP_PAP.run(alpha, maxIt, file, biasType, 
+			GRASP_PAP.run(alpha, maxIt, "instances/" + file, biasType, 
 						  constrMethod, rpgP, maxTime);
 		}
 	}
@@ -304,10 +324,13 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		// Changeable parameters.
 		double alpha1 = 0.25, alpha2 = 0.7;
 		
+		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
+					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime);
+		
+		/*
 		// 1 - Testing default/alpha1/random bias.
-		GRASP_PAP.testAll(alpha1, maxIterations, 
-						  BiasFunction.RANDOM,
-						  AbstractGRASP.Construction.DEF, 
-						  rpgP, maxTime);	
+		GRASP_PAP.testAll(alpha1, maxIterations, BiasFunction.RANDOM,
+						  Construction.DEF, rpgP, maxTime);
+		*/	
 	}
 }
