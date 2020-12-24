@@ -239,6 +239,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 				ObjFunction.evaluate(currentSol);
 			}
 		} while (minDeltaCost < -Double.MIN_VALUE);
+		
 		return null;
 	}
 	
@@ -298,18 +299,51 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 										rpgP);
 		
 		Solution<Integer[]> bestSol = grasp.solve(maxTime);
-		bestSol = new PAP_Solution(bestSol);
-		System.out.println("maxVal = " + bestSol);
-		System.out.println();
-
+		
+		// Get final time
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
 		double secTime = (double)totalTime/(double)1000;
+		
+		// Get time slots and other parameters.
+		Integer[][] slots = ((PAP)grasp.ObjFunction).profSlots;
+		int T = ((PAP)grasp.ObjFunction).T;
+		PAP_Solution finalSol = new PAP_Solution();
+		
+		// Add the time slot for each professor/class pair on a new solution.
+		finalSol.cost = bestSol.cost;
+		finalSol.size = 3;
+		for(Integer [] e : bestSol) {
+			for(int t=0; t<T; t++) {
+				if (slots[e[0]][t] == e[1]) {
+					Integer [] newE = {e[0],e[1],t};
+					finalSol.add(newE);
+				}
+			}
+		}
+		
+		// Print solution
+		System.out.println("maxVal = " + finalSol);
+		System.out.println();
 		System.out.println("Time = "+secTime+" seg");
 		
-	      if (fileWriter != null) {
-	          fileWriter.append(filename + ";" + bestSol.cost + ";" + secTime + "\n");
-	      }
+		boolean debug = true;
+	    if (fileWriter != null) {
+	    	
+	    	// Debug: print solution and cost.
+	    	if (debug) {
+	    		String out = finalSol.cost + "\n";
+	    		for(Integer [] e : finalSol) {
+	    			out += "(" + e[0] + "," + e[1] + "," + e[2] + ")\n";
+	    		}
+	    		fileWriter.append(out);
+	    	}
+	    	
+	    	// Regular: print name, cost, and time. Not elements.
+	    	else {
+	    		fileWriter.append(filename + ";" + finalSol.cost + ";" + secTime + "\n");
+	    	}
+	    }
 	}
 	
 	public static void testAll(double alpha, int maxIt, 
@@ -327,6 +361,8 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 			GRASP_PAP.run(alpha, maxIt, "instances/" + file, biasType, 
 						  constrMethod, rpgP, maxTime, fileWriter);
 		}
+		fileWriter.close();
+
 	}
 	
 	/**
@@ -342,9 +378,11 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		// Changeable parameters.
 		double alpha1 = 0.25, alpha2 = 0.7;
 		
+		FileWriter fileWriter = new FileWriter("results/GRASP_PAP.txt");
 		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
 					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime,
-					  null);
+					  fileWriter);
+		fileWriter.close();
 		
 		/*
 		// 1 - Testing default/alpha1/random bias.
