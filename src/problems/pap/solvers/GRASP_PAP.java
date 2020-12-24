@@ -372,7 +372,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		// Fixed parameters
 		double maxTime = 1800.0;
-		int maxIterations = 1;
+		int maxIterations = 1000;
 		int rpgP = 2;
 		
 		// Changeable parameters.
