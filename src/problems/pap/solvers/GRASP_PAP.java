@@ -91,19 +91,9 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 * @see grasp.abstracts.AbstractGRASP#makeCL()
 	 */
 	@Override
-	public ArrayList<Integer[]> makeCL() {
-		int D = ((PAP)ObjFunction).D;
-		
+	public ArrayList<Integer[]> makeCL() {		
 		((PAP)ObjFunction).resetStatus();
-		
-		ArrayList<Integer[]> _CL = new ArrayList<Integer[]>();
-		for (int i = 0; i < ObjFunction.getDomainSize(); i++) {
-			Integer[] cand = {i/D, i%D};
-			_CL.add(cand);
-
-		}
-
-		return _CL;
+		return new ArrayList<Integer[]>();
 	}
 	
 	/*
@@ -127,16 +117,30 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		// Get constant
 		int D = ((PAP)ObjFunction).D;
+		int P = ObjFunction.getDomainSize()/D;
 		
 		// Get problem variables
 		((PAP)ObjFunction).setVariables(currentSol);
 		
-		for (int i = 0; i < ObjFunction.getDomainSize(); i++) {
-			Integer[] cand = {i/D, i%D};
-			if(((PAP)ObjFunction).isFeasible(cand)) {
-				CL.add(cand);
+		// Filter available classes		
+		ArrayList<Integer> classes = new ArrayList<Integer>();
+		for (Integer d = 0; d < D; d++) {
+			// If class is available, add it.
+			if(((PAP)ObjFunction).isClassAvailable(d)){
+				classes.add(d);
 			}
 		}
+			
+		// Check if each element is feasible.
+		for (Integer p = 0; p < P; p++) {
+			for(Integer d : classes) {
+				Integer[] cand = {p, d};
+				if(((PAP)ObjFunction).isFeasible(cand)) {
+					CL.add(cand);
+				}
+			}
+		}
+		
 	}
 	
 	/**
@@ -369,7 +373,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		// Fixed parameters
 		double maxTime = 1800.0;
-		int maxIterations = 20;
+		int maxIterations = 1000;
 		int rpgP = 2;
 		
 		// Changeable parameters.
@@ -377,7 +381,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		FileWriter fileWriter = new FileWriter("results/GRASP_PAP_DEBUG.txt");
 		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S5.pap",
-					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime,
+					  BiasFunction.LINEAR, Construction.DEF, rpgP, maxTime,
 					  fileWriter, true);
 		fileWriter.close();
 		

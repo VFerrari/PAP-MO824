@@ -71,6 +71,9 @@ public class PAP implements Evaluator<Integer[]> {
 		S = vals[3];
 		H = vals[4];
 		variables = allocateVariables();
+		
+		timeSlots 	 = new Integer[T];
+		profWorkload = new Integer[P];
 		resetStatus();
 	}
 		
@@ -84,7 +87,14 @@ public class PAP implements Evaluator<Integer[]> {
 		
 		// Time Slots
 		for (int i=0; i<h[d]; i++) {
-			for(; (timeSlots[t] >= S || !r[p][t] || profSlots[p][t] >= 0); t++);
+			
+			// Find a viable time slot.
+			// Has less than S classes allocated;
+			// Professor is available;
+			// Professor is not already allocated.
+			while(timeSlots[t] >= S || !r[p][t] || profSlots[p][t] >= 0) {
+				t++;
+			}
 			timeSlots[t]++;
 			profSlots[p][t] = d;
 		}
@@ -101,7 +111,7 @@ public class PAP implements Evaluator<Integer[]> {
 		int d = outCand[1];
 		int t = 0;
 		
-		// Time Slots
+		// Find allocated time slots and remove them.
 		for (t=0; t<T; t++) {
 			if (profSlots[p][t] == d) {
 				timeSlots[t]--;
@@ -114,29 +124,36 @@ public class PAP implements Evaluator<Integer[]> {
 	}
 	
 	/**
+	 * Checks if a certain class is available.
+	 * That is, if there isn't any professors allocated to it.
+	 * @param d Class to be checked.
+	 * @return true if available, false otherwise.
+	 */
+	public boolean isClassAvailable(Integer d) {
+		boolean available = true;
+		
+		// Check if there is already a professor in the class.
+		for(int p=0; p<P; p++) {
+			if(variables[p][d] == 1) {
+				available = false;
+				break;
+			}
+		}
+		
+		return available;
+	}
+	
+	/**
 	 * Checks if the (professor, class) set is feasible (checks ILP restrictions).
 	 * @param cand (professor, class) set
 	 * @return true if feasible, false otherwise.
 	 */
 	public boolean isFeasible(Integer[] cand) {
 		boolean feasible = true;
+		int p = cand[0];
 		int d = cand[1];
-		int p, t, sum;
-		
-		// Check if in solution.
-		for(p=0; p<P; p++) {
-			if(variables[p][d] == 1) {
-				feasible = false;
-				break;
-			}
-		}
-		
-		// Early return
-		if (!feasible) {
-			return false;
-		}
-		
-		p = cand[0];
+		int t, sum;
+				
 		// Check if workload handles class.
 		if(profWorkload[p] + h[d] > H) {
 			feasible = false;
@@ -146,7 +163,9 @@ public class PAP implements Evaluator<Integer[]> {
 		else {
 			sum = 0;
 			for(t=0; t<T; t++) {
-				sum += (timeSlots[t] < S && r[p][t] && profSlots[p][t] < 0) ? 1:0;
+				if (timeSlots[t] < S && r[p][t] && profSlots[p][t] < 0) {
+					sum++;
+				}
 			}
 			
 			feasible = (sum >= h[d]);
@@ -405,8 +424,7 @@ public class PAP implements Evaluator<Integer[]> {
 	 * @return a pointer to the array of domain variables.
 	 */
 	protected Integer[][] allocateVariables() {
-		Integer[][] _variables = new Integer[P][D];
-		return _variables;
+		return new Integer[P][D];
 	}
 
 	/**
@@ -424,7 +442,6 @@ public class PAP implements Evaluator<Integer[]> {
 	public void resetStatus() {
 		
 		// Fill time slots
-		timeSlots = new Integer[T];
 		Arrays.fill(timeSlots, 0);
 		
 		// Fill professor slots
@@ -434,7 +451,6 @@ public class PAP implements Evaluator<Integer[]> {
 		}
 		
 		// Fill professor workload
-		profWorkload = new Integer[P];
 		Arrays.fill(profWorkload, 0);
 	}
 
