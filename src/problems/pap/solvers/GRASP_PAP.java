@@ -378,7 +378,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		// Changeable parameters.
 		double alpha1 = 0.25, alpha2 = 0.7;
 		
-		FileWriter fileWriter = new FileWriter("results/GRASP_PAP.txt");
+		FileWriter fileWriter = new FileWriter("results/GRASP_PAP_DEBUG.txt");
 		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
 					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime,
 					  fileWriter);
