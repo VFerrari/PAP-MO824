@@ -287,7 +287,8 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 */
 	public static void run(double alpha, int maxIt, String filename,
 						   BiasFunction biasType, Construction constrMethod, 
-						   int rpgP, double maxTime, FileWriter fileWriter) 
+						   int rpgP, double maxTime, FileWriter fileWriter,
+						   boolean debug) 
 					   throws IOException {
 		
 		long startTime = System.currentTimeMillis();
@@ -327,7 +328,6 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		System.out.println();
 		System.out.println("Time = "+secTime+" seg");
 		
-		boolean debug = true;
 	    if (fileWriter != null) {
 	    	
 	    	// Debug: print solution and cost.
@@ -359,7 +359,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 
 		for(String file : inst) {
 			GRASP_PAP.run(alpha, maxIt, "instances/" + file, biasType, 
-						  constrMethod, rpgP, maxTime, fileWriter);
+						  constrMethod, rpgP, maxTime, fileWriter, false);
 		}
 		fileWriter.close();
 
@@ -381,7 +381,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		FileWriter fileWriter = new FileWriter("results/GRASP_PAP_DEBUG.txt");
 		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
 					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime,
-					  fileWriter);
+					  fileWriter, true);
 		fileWriter.close();
 		
 		/*
