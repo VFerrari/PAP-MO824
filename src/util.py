@@ -71,13 +71,15 @@ def sol_to_vars(inst, sol):
 
 def check_viability(inst, sol):
     x,z = sol_to_vars(inst, sol)
-    
+    is_ok = True
+
     # Restriction 2.2
     if not (x.sum(axis=0) <= 1).all():
         print("Professor per class violation! Infeasible.")
         print("Professors per class:")
         print(x.sum(axis=0))
-        return False
+        #return False
+        is_ok = False
     
     # Restriction 2.3
     if not (z.sum(axis=0) <= inst['S']).all():
@@ -85,14 +87,16 @@ def check_viability(inst, sol):
         print("Rooms available:", inst['S'])
         print("Classes per slot:")
         print(z.sum(axis=0))
-        return False
+        #return False
+        is_ok = False
 
     # Restriction 2.4
     if not (z <= inst['r']).all():
         print("Availability violation! Infeasible.")
         where = np.where(z > inst['r'])
         print(list(zip(where[0], where[1])))
-        return False
+        #return False
+        is_ok = False
     
     # Restriction 2.5
     if not (z.sum(axis=1) <= inst['H']).all():
@@ -100,7 +104,8 @@ def check_viability(inst, sol):
         print("Max workload:", inst['H'])
         print("Actual workload per prof:")
         print(z.sum(axis=1))
-        return False
+        #return False
+        is_ok = False
     
     # Restriction 2.6
     # For convenience, h[d] becomes h[p][d], with h[*][d] being equal.
@@ -112,9 +117,10 @@ def check_viability(inst, sol):
         
         print("Professor workload:")
         print((inst['h'] * x).sum(axis=1))
-        return False
+        #return False
+        is_ok = False
     
-    return True
+    return is_ok
 
 if __name__ == "__main__":
     
