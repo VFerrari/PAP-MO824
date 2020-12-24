@@ -67,12 +67,17 @@ def sol_to_vars(inst, sol):
         x[p][d] = 1
         z[p][t] = 1
     
-    y = x.sum(axis=0)
-    
-    return x,y,z
+    return x,z
 
 def check_viability(inst, sol):
-    x,y,z = sol_to_vars(inst, sol)
+    x,z = sol_to_vars(inst, sol)
+    
+    # Restriction 2.2
+    if not (x.sum(axis=0) <= 1).all():
+        print("Professor per class violation! Infeasible.")
+        print("Professors per class:")
+        print(x.sum(axis=0))
+        return False
     
     # Restriction 2.3
     if not (z.sum(axis=0) <= inst['S']).all():
@@ -80,14 +85,14 @@ def check_viability(inst, sol):
         print("Rooms available:", inst['S'])
         print("Classes per slot:")
         print(z.sum(axis=0))
-        return
+        return False
 
     # Restriction 2.4
     if not (z <= inst['r']).all():
         print("Availability violation! Infeasible.")
         where = np.where(z > inst['r'])
         print(list(zip(where[0], where[1])))
-        return
+        return False
     
     # Restriction 2.5
     if not (z.sum(axis=1) <= inst['H']).all():
@@ -95,19 +100,21 @@ def check_viability(inst, sol):
         print("Max workload:", inst['H'])
         print("Actual workload per prof:")
         print(z.sum(axis=1))
-        return
+        return False
     
     # Restriction 2.6
-    if not (z.sum(axis=1) == inst['h'] * x.sum(axis=1)).all():
+    # For convenience, h[d] becomes h[p][d], with h[*][d] being equal.
+    inst['h'] = np.array([list(inst['h'])]*inst['P'])
+    if not (z.sum(axis=1) == (inst['h'] * x).sum(axis=1)).all():
         print("Coupling violation! Infeasible.")
         print("Slots per professor:")
         print(z.sum(axis=1))
         
         print("Professor workload:")
-        print(inst['h'] * x.sum(axis=1))
-        return
+        print((inst['h'] * x).sum(axis=1))
+        return False
     
-    print("Solution is feasible!")
+    return True
 
 if __name__ == "__main__":
     
@@ -119,4 +126,5 @@ if __name__ == "__main__":
     PAP = read_instance(argv[1])
     sol = read_solution(argv[2])
     
-    check_viability(PAP, sol)
+    if check_viability(PAP, sol):
+        print("Solution is feasible!")
