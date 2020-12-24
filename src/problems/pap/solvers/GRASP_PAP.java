@@ -312,7 +312,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		// Add the time slot for each professor/class pair on a new solution.
 		finalSol.cost = bestSol.cost;
-		finalSol.size = 3;
+		finalSol.len = 3;
 		for(Integer [] e : bestSol) {
 			for(int t=0; t<T; t++) {
 				if (slots[e[0]][t] == e[1]) {
