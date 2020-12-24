@@ -1,3 +1,17 @@
+'''
+Activity 9 - Professor Allocation Problem (PAP).
+
+util.py: File with auxiliary functions for PAP.
+
+Subject:
+    MC859/MO824 - Operational Research.
+Author:
+    Victor Ferreira Ferrari - RA 187890
+
+University of Campinas - UNICAMP - 2020
+
+Last Modified: 24/12/2020 (yeah, Christmas Eve, because that's my life)
+'''
 
 from sys import argv
 from os.path import exists

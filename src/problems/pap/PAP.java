@@ -120,17 +120,25 @@ public class PAP implements Evaluator<Integer[]> {
 	 */
 	public boolean isFeasible(Integer[] cand) {
 		boolean feasible = true;
-		int p = cand[0];
 		int d = cand[1];
-		int t, sum;
+		int p, t, sum;
 		
 		// Check if in solution.
-		if(variables[p][d] == 1) {
-			feasible = false;
+		for(p=0; p<P; p++) {
+			if(variables[p][d] == 1) {
+				feasible = false;
+				break;
+			}
 		}
 		
+		// Early return
+		if (!feasible) {
+			return false;
+		}
+		
+		p = cand[0];
 		// Check if workload handles class.
-		else if(profWorkload[p] + h[d] > H) {
+		if(profWorkload[p] + h[d] > H) {
 			feasible = false;
 		}
 		
@@ -142,8 +150,6 @@ public class PAP implements Evaluator<Integer[]> {
 			}
 			
 			feasible = (sum >= h[d]);
-			//feasible = true;
-			
 		}
 		
 		return feasible;
@@ -238,12 +244,9 @@ public class PAP implements Evaluator<Integer[]> {
 	 *         insertion.
 	 */
 	public Double evaluateInsertionPAP(Integer[] i) {
-		int d = i[1];
 		
-		// If there is already a professor in this class, return lowest possible value.
-		for(int p=0; p<P; p++)
-			if (variables[p][d] == 1)
-				return 0.0;
+		if (variables[i[0]][i[1]] == 1)
+			return 0.0;
 
 		return evaluateContributionPAP(i);
 	}

@@ -173,6 +173,16 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	
 	/**
 	 * {@inheritDoc}
+	 */
+	@Override
+	public Solution<Integer[]> newSolution(Solution<Integer[]> sol){
+		PAP_Solution newSol = new PAP_Solution(sol);
+		newSol.slots = ((PAP)ObjFunction).profSlots;
+		return newSol;
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * 
 	 * The local search operator developed for the QBFPT objective function is
 	 * composed by the neighborhood moves Insertion, Removal and 2-Exchange.
@@ -307,24 +317,11 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		double secTime = (double)totalTime/(double)1000;
 		
 		// Get time slots and other parameters.
-		Integer[][] slots = ((PAP)grasp.ObjFunction).profSlots;
 		int T = ((PAP)grasp.ObjFunction).T;
-		PAP_Solution finalSol = new PAP_Solution();
-		
-		// Add the time slot for each professor/class pair on a new solution.
-		finalSol.cost = bestSol.cost;
-		finalSol.len = 3;
-		for(Integer [] e : bestSol) {
-			for(int t=0; t<T; t++) {
-				if (slots[e[0]][t] == e[1]) {
-					Integer [] newE = {e[0],e[1],t};
-					finalSol.add(newE);
-				}
-			}
-		}
+		((PAP_Solution)bestSol).addSlots(T);
 		
 		// Print solution
-		System.out.println("maxVal = " + finalSol);
+		System.out.println("maxVal = " + bestSol);
 		System.out.println();
 		System.out.println("Time = "+secTime+" seg");
 		
@@ -332,8 +329,8 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	    	
 	    	// Debug: print solution and cost.
 	    	if (debug) {
-	    		String out = finalSol.cost + "\n";
-	    		for(Integer [] e : finalSol) {
+	    		String out = bestSol.cost + "\n";
+	    		for(Integer [] e : bestSol) {
 	    			out += "(" + e[0] + "," + e[1] + "," + e[2] + ")\n";
 	    		}
 	    		fileWriter.append(out);
@@ -341,7 +338,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	    	
 	    	// Regular: print name, cost, and time. Not elements.
 	    	else {
-	    		fileWriter.append(filename + ";" + finalSol.cost + ";" + secTime + "\n");
+	    		fileWriter.append(filename + ";" + bestSol.cost + ";" + secTime + "\n");
 	    	}
 	    }
 	}
@@ -372,14 +369,14 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		// Fixed parameters
 		double maxTime = 1800.0;
-		int maxIterations = 1000;
+		int maxIterations = 20;
 		int rpgP = 2;
 		
 		// Changeable parameters.
 		double alpha1 = 0.25, alpha2 = 0.7;
 		
 		FileWriter fileWriter = new FileWriter("results/GRASP_PAP_DEBUG.txt");
-		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
+		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S5.pap", 
 					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime,
 					  fileWriter, true);
 		fileWriter.close();

@@ -257,9 +257,9 @@ public abstract class AbstractGRASP<E> {
 			constructiveHeuristic();
 			localSearch();
 			if (incumbentSol.cost > currentSol.cost) {
-				incumbentSol = new Solution<E>(currentSol);
+				incumbentSol = newSolution(currentSol);
 				if (verbose)
-					System.out.println("(Iter. " + i + ") BestSol = " + currentSol);
+					System.out.println("(Iter. " + i + ") BestSol = " + incumbentSol);
 			}
 			
 			endTime   = System.currentTimeMillis();
@@ -284,6 +284,15 @@ public abstract class AbstractGRASP<E> {
 	 */
 	public Boolean constructiveStopCriteria() {
 		return (currentCost > currentSol.cost) ? false : true;
+	}
+	
+	/**
+	 * Create new solution.
+	 * @param sol Old solution.
+	 * @return New solution.
+	 */
+	public Solution<E> newSolution(Solution<E> sol){
+		return new Solution<E>(sol);
 	}
 
 }
