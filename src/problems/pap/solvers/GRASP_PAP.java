@@ -3,8 +3,10 @@ package problems.pap.solvers;
 import metaheuristics.grasp.AbstractGRASP;
 import problems.pap.PAP_Inverse;
 import solutions.Solution;
+import solutions.PAP_Solution;
 import problems.pap.PAP;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -164,7 +166,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 */
 	@Override
 	public Solution<Integer[]> createEmptySol() {
-		Solution<Integer[]> sol = new Solution<Integer[]>();
+		Solution<Integer[]> sol = new PAP_Solution();
 		sol.cost = 100.0*((PAP)ObjFunction).D;
 		return sol;
 	}
@@ -284,7 +286,7 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 	 */
 	public static void run(double alpha, int maxIt, String filename,
 						   BiasFunction biasType, Construction constrMethod, 
-						   int rpgP, double maxTime) 
+						   int rpgP, double maxTime, FileWriter fileWriter) 
 					   throws IOException {
 		
 		long startTime = System.currentTimeMillis();
@@ -296,14 +298,18 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 										rpgP);
 		
 		Solution<Integer[]> bestSol = grasp.solve(maxTime);
+		bestSol = new PAP_Solution(bestSol);
 		System.out.println("maxVal = " + bestSol);
-		for(Integer[] e : bestSol)
-			System.out.print("(" + e[0] + "," + e[1] + ") ");
 		System.out.println();
 
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
-		System.out.println("Time = "+(double)totalTime/(double)1000+" seg");		
+		double secTime = (double)totalTime/(double)1000;
+		System.out.println("Time = "+secTime+" seg");
+		
+	      if (fileWriter != null) {
+	          fileWriter.append(filename + ";" + bestSol.cost + ";" + secTime + "\n");
+	      }
 	}
 	
 	public static void testAll(double alpha, int maxIt, 
@@ -314,9 +320,12 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
         String[] inst = {"P50D50S1.pap", "P50D50S3.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S3.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S8.pap", "P70D100S10.pap", "P100D150S10.pap", "P100D150S15.pap", "P100D150S20.pap"};
 		
+		// create a text file
+        FileWriter fileWriter = new FileWriter("results/GRASP_PAP.txt");
+
 		for(String file : inst) {
 			GRASP_PAP.run(alpha, maxIt, "instances/" + file, biasType, 
-						  constrMethod, rpgP, maxTime);
+						  constrMethod, rpgP, maxTime, fileWriter);
 		}
 	}
 	
@@ -327,14 +336,15 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		
 		// Fixed parameters
 		double maxTime = 1800.0;
-		int maxIterations = 1000;
+		int maxIterations = 1;
 		int rpgP = 2;
 		
 		// Changeable parameters.
 		double alpha1 = 0.25, alpha2 = 0.7;
 		
-		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S5.pap", 
-					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime);
+		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S1.pap", 
+					  BiasFunction.RANDOM,  Construction.DEF, rpgP, maxTime,
+					  null);
 		
 		/*
 		// 1 - Testing default/alpha1/random bias.

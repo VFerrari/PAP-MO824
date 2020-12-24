@@ -259,7 +259,7 @@ public abstract class AbstractGRASP<E> {
 			if (incumbentSol.cost > currentSol.cost) {
 				incumbentSol = new Solution<E>(currentSol);
 				if (verbose)
-					System.out.println("(Iter. " + i + ") BestSol = " + incumbentSol);
+					System.out.println("(Iter. " + i + ") BestSol = " + currentSol);
 			}
 			
 			endTime   = System.currentTimeMillis();
