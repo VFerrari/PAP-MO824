@@ -377,18 +377,32 @@ public class GRASP_PAP extends AbstractGRASP<Integer[]> {
 		int rpgP = 2;
 		
 		// Changeable parameters.
-		double alpha1 = 0.25, alpha2 = 0.7;
+		double alpha1 = 0.1, alpha2 = 0.25, alpha3 = 0.4;
 		
+		/*
 		FileWriter fileWriter = new FileWriter("results/GRASP_PAP_DEBUG.txt");
 		GRASP_PAP.run(alpha1, maxIterations, "instances/" + "P50D50S5.pap",
 					  BiasFunction.LINEAR, Construction.DEF, rpgP, maxTime,
 					  fileWriter, true);
 		fileWriter.close();
+		*/
 		
-		/*
-		// 1 - Testing default/alpha1/random bias.
-		GRASP_PAP.testAll(alpha1, maxIterations, BiasFunction.RANDOM,
+		
+		// 1 - Testing default/alpha2/random bias.
+		GRASP_PAP.testAll(alpha2, maxIterations, BiasFunction.RANDOM,
 						  Construction.DEF, rpgP, maxTime);
-		*/	
+		
+		// 2 - Testing default/alpha2/linear bias.
+		GRASP_PAP.testAll(alpha2, maxIterations, BiasFunction.LINEAR,
+						  Construction.DEF, rpgP, maxTime);
+		
+		// 3 - Testing default/alpha1/linear bias.
+		GRASP_PAP.testAll(alpha1, maxIterations, BiasFunction.LINEAR,
+						  Construction.DEF, rpgP, maxTime);
+		
+		// 4 - Testing default/alpha3/linear bias.
+		GRASP_PAP.testAll(alpha3, maxIterations, BiasFunction.LINEAR,
+						  Construction.DEF, rpgP, maxTime);
+			
 	}
 }

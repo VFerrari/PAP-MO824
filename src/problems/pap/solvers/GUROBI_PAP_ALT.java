@@ -16,7 +16,6 @@ public class GUROBI_PAP_ALT {
     public static GRBEnv env;
     public static GRBModel model;
     public GRBVar[][] x, z;
-    public GRBVar[] y;
     public PAP problem;
 
     public GUROBI_PAP_ALT(String filename) throws IOException {
@@ -34,11 +33,6 @@ public class GUROBI_PAP_ALT {
         	}
         }
         
-        y = new GRBVar[problem.D];
-        for (i=0; i<problem.D; i++) {
-        	y[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "y[" + i + "]");
-        }
-
         z = new GRBVar[problem.P][problem.T];
         for (i = 0; i < problem.P; i++) {
         	for (j = 0; j < problem.T; j++) {
@@ -53,9 +47,8 @@ public class GUROBI_PAP_ALT {
 
         for (i = 0; i < problem.D; i++) {
             for (j = 0; j < problem.P; j++) {
-                obj.addTerm(problem.A[j][i], x[j][i]);
+                obj.addTerm(problem.A[j][i]+100, x[j][i]);
             }
-            obj.addTerm(100, y[i]);
         }
 
         model.setObjective(obj);
@@ -70,7 +63,7 @@ public class GUROBI_PAP_ALT {
             for(j=0; j<problem.P; j++) {
             	expr.addTerm(1, x[j][i]);
             }
-            model.addConstr(expr, GRB.EQUAL, y[i], String.valueOf("class_" + i + "_profs"));
+            model.addConstr(expr, GRB.LESS_EQUAL, 1.0, String.valueOf("class_" + i + "_profs"));
         }
         
         // Available classrooms constraints
@@ -110,7 +103,7 @@ public class GUROBI_PAP_ALT {
         	}
         	model.addConstr(expr, GRB.EQUAL, expr2, String.valueOf("prof_" + i + "_one_per_slot"));
         }
-        
+                
         model.update();
 
         // maximization objective function
@@ -124,7 +117,7 @@ public class GUROBI_PAP_ALT {
     	//String[] instances = {"P50D50S1.pap", "P50D50S5.pap", "P70D70S1.pap", "P70D70S5.pap", "P70D100S6.pap", "P70D100S10.pap"};
     	
         // create text file
-        FileWriter fileWriter = new FileWriter("results/GUROBI_PAP_ALT.txt");
+        FileWriter fileWriter = new FileWriter("results/GUROBI_PAP.txt");
 
         for (String instance : instances) {
             // read the problem
@@ -143,10 +136,10 @@ public class GUROBI_PAP_ALT {
 
             // save the solution in text file
             double val   = model.get(GRB.DoubleAttr.ObjVal)-100*gurobi.problem.D;
-            double bound = model.get(GRB.DoubleAttr.ObjBound)-100*gurobi.problem.D; 
+            double bound = model.get(GRB.DoubleAttr.ObjBound)-100*gurobi.problem.D;
             double time = model.get(GRB.DoubleAttr.Runtime);
             fileWriter.append(instance + ";" + val + ";" + bound + ";" + time + "\n");
-            
+
             // dispose the environment and model
             model.dispose();
             env.dispose();
